@@ -1,3 +1,21 @@
 from django.db import models
 
-# Create your models here.
+
+class Country(models.Model):
+    name = models.CharField(max_length=63, unique=True)
+
+    class Meta:
+        verbose_name_plural = "countries"
+
+
+class City(models.Model):
+    name = models.CharField(max_length=63, unique=True)
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="cities"
+    )
+
+    class Meta:
+        verbose_name_plural = "cities"
