@@ -9,6 +9,7 @@ from service.views import (
     AirCompanyViewSet,
     AirplaneViewSet,
     FlightViewSet,
+    OrderViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -19,7 +20,7 @@ router.register("airplane-type", AirplaneTypeViewSet)
 router.register("air-company", AirCompanyViewSet)
 router.register("airplane", AirplaneViewSet)
 router.register("flight", FlightViewSet)
-
+router.register("orders", OrderViewSet)
 
 urlpatterns = [path("", include(router.urls))]
 
