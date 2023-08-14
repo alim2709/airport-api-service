@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django.shortcuts import render
 from rest_framework import viewsets
 
@@ -9,7 +10,7 @@ from service.models import (
     AirCompany,
     Airplane,
     Flight,
-    Ticket
+    Ticket, Order
 )
 from service.serializers import (
     CrewSerializer,
@@ -19,7 +20,8 @@ from service.serializers import (
     AirCompanySerializer,
     AirplaneSerializer,
     FlightSerializer,
-    TicketSerializer
+    OrderSerializer,
+    OrderListSerializer
 )
 
 
@@ -56,6 +58,38 @@ class AirplaneViewSet(viewsets.ModelViewSet):
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    # pagination_class = OrderPagination
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(user=self.request.user)
+        if self.action == "list":
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    "tickets",
+                    queryset=Ticket.objects.select_related(
+                        "flight__route__destination",
+                        "flight__route__source"
+                    ).prefetch_related(
+                        "flight__airplane",
+                        "flight__crew"
+                    )
+                )
+            )
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return OrderListSerializer
+        return OrderSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 
