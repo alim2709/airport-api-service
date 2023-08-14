@@ -1,6 +1,7 @@
 from django.db.models import Prefetch
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 
 from service.models import (
     Crew,
@@ -60,10 +61,17 @@ class FlightViewSet(viewsets.ModelViewSet):
     serializer_class = FlightSerializer
 
 
+class OrderPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    # pagination_class = OrderPagination
+    pagination_class = OrderPagination
+
     # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -90,6 +98,3 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-
-
