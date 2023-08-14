@@ -26,6 +26,16 @@ class AirportSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "closest_big_city",)
 
 
+class AirportListSerializer(AirportSerializer):
+    closest_big_city = serializers.SlugRelatedField(many=False, read_only=True, slug_field="name")
+
+
+class AirportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airport
+        fields = ("id", "image",)
+
+
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
