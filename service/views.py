@@ -2,6 +2,7 @@ from django.db.models import Prefetch
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 
 from service.models import (
     Crew,
@@ -71,6 +72,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
+    permission_classes = (IsAuthenticated,)
 
     # permission_classes = (IsAuthenticated,)
 
