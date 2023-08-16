@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
+from country.models import City
 from country.serializers import CityDetailSerializer
 from service.models import (
     Crew,
@@ -22,6 +23,10 @@ class CrewSerializer(serializers.ModelSerializer):
 
 
 class AirportSerializer(serializers.ModelSerializer):
+    closest_big_city = serializers.SlugRelatedField(
+        slug_field="id", queryset=City.objects.select_related("country")
+    )
+
     class Meta:
         model = Airport
         fields = ("id", "name", "closest_big_city",)
@@ -42,6 +47,13 @@ class AirportImageSerializer(serializers.ModelSerializer):
 
 
 class RouteSerializer(serializers.ModelSerializer):
+    source = serializers.SlugRelatedField(
+        slug_field="id", queryset=Airport.objects.select_related("closest_big_city")
+    )
+    destination = serializers.SlugRelatedField(
+        slug_field="id", queryset=Airport.objects.select_related("closest_big_city")
+    )
+
     class Meta:
         model = Route
         fields = ("id", "source", "destination", "distance")
@@ -70,6 +82,7 @@ class AirCompanySerializer(serializers.ModelSerializer):
 
 
 class AirplaneSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Airplane
         fields = ("id", "name", "rows", "seats_in_row", "capacity", "airplane_type", "air_company")
@@ -86,6 +99,14 @@ class AirplaneDetailSerializer(AirplaneSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
+    route = serializers.SlugRelatedField(
+        slug_field="id",
+        queryset=Route.objects.select_related("source", "destination")
+    )
+    airplane = serializers.SlugRelatedField(
+        slug_field="id", queryset=Airplane.objects.select_related("airplane_type", "air_company")
+    )
+
     def validate(self, attrs):
         data = super(FlightSerializer, self).validate(attrs)
         Flight.validate_departure_arrival_time(
@@ -115,29 +136,6 @@ class FlightListSerializer(FlightSerializer):
         )
 
 
-class FlightDetailSerializer(FlightSerializer):
-    route = RouteDetailSerializer(many=False, read_only=True)
-    crew = CrewSerializer(many=True, read_only=True)
-    airplane = AirplaneDetailSerializer(many=False, read_only=True)
-    taken_seats = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Flight
-        fields = ("id", "route", "airplane", "taken_seats", "departure_time", "arrival_time", "crew")
-
-    def get_seat_and_row(self, ticket):
-        return {"row": ticket.row, "seat": ticket.seat}
-
-    def get_taken_seats(self, flight):
-        return [self.get_seat_and_row(ticket) for ticket in
-                flight.tickets.all()]
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["taken_seats"] = self.get_taken_seats(instance)
-        return data
-
-
 class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs)
@@ -149,6 +147,25 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ("id", "row", "seat", "flight")
+
+
+class TicketSeatsSerializer(TicketSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat")
+
+
+class FlightDetailSerializer(FlightSerializer):
+    route = RouteDetailSerializer(many=False, read_only=True)
+    crew = CrewSerializer(many=True, read_only=True)
+    airplane = AirplaneDetailSerializer(many=False, read_only=True)
+    taken_seats = TicketSeatsSerializer(
+        source="tickets", many=True, read_only=True
+    )
+
+    class Meta:
+        model = Flight
+        fields = ("id", "route", "airplane", "taken_seats", "departure_time", "arrival_time", "crew")
 
 
 class TicketListSerializer(TicketSerializer):

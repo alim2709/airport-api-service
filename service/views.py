@@ -161,12 +161,9 @@ class FlightViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(arrival_time__date=arrival_date)
 
         return queryset.select_related(
-            "airplane__airplane_type",
-            "airplane__air_company",
+            "airplane",
             "route__source",
-            "route__destination",
-            "route__source__closest_big_city",
-            "route__destination__closest_big_city"
+            "route__destination"
         ).prefetch_related("crew").distinct()
 
     def get_serializer_class(self):
