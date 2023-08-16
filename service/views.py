@@ -1,4 +1,4 @@
-from django.db.models import Prefetch
+from django.db.models import Prefetch, F, Count
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -27,8 +27,14 @@ from service.serializers import (
     OrderSerializer,
     OrderListSerializer,
     AirportListSerializer,
-    AirportImageSerializer
+    AirportImageSerializer, RouteListSerializer, AirportDetailSerializer, RouteDetailSerializer, AirplaneListSerializer,
+    AirplaneDetailSerializer, FlightListSerializer, FlightDetailSerializer
 )
+
+
+def _params_to_ints(qs):
+    """Converts a list of string IDs to a list of integers"""
+    return [int(str_id) for str_id in qs.split(",")]
 
 
 class CrewViewSet(viewsets.ModelViewSet):
@@ -49,6 +55,8 @@ class AirportViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return AirportListSerializer
+        if self.action == "retrieve":
+            return AirportDetailSerializer
         if self.action == "upload_image":
             return AirportImageSerializer
         return AirportSerializer
@@ -67,6 +75,28 @@ class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
 
+    def get_queryset(self):
+
+        """Filtering by source and destination"""
+
+        queryset = self.queryset
+
+        source = self.request.query_params.get("source")
+        destination = self.request.query_params.get("destination")
+
+        if source:
+            queryset = queryset.filter(source__name__icontains=source)
+        if destination:
+            queryset = queryset.filter(destination__name__icontains=destination)
+        return queryset.distinct()
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return RouteListSerializer
+        if self.action == "retrieve":
+            return RouteDetailSerializer
+        return RouteSerializer
+
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
@@ -82,10 +112,50 @@ class AirplaneViewSet(viewsets.ModelViewSet):
     queryset = Airplane.objects.all()
     serializer_class = AirplaneSerializer
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return AirplaneListSerializer
+        if self.action == "retrieve":
+            return AirplaneDetailSerializer
+        return AirplaneSerializer
+
 
 class FlightViewSet(viewsets.ModelViewSet):
     queryset = Flight.objects.all()
     serializer_class = FlightSerializer
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+
+        if self.action == "list":
+            queryset = (
+                queryset.select_related("airplane")
+                .annotate(tickets_available=F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets"))
+                .order_by("id")
+            )
+
+        """Filtering by route, departure date, arrival date"""
+
+        route = self.request.query_params.get("route")
+        departure_date = self.request.query_params.get("departure")
+        arrival_date = self.request.query_params.get("arrival")
+        if route:
+            route_ids = _params_to_ints(route)
+            queryset = queryset.filter(route__id__in=route_ids)
+        if departure_date:
+            queryset = queryset.filter(departure_time__date=departure_date)
+        if arrival_date:
+            queryset = queryset.filter(arrival_time__date=arrival_date)
+
+        return queryset.distinct()
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return FlightListSerializer
+        if self.action == "retrieve":
+            return FlightDetailSerializer
+        return FlightSerializer
 
 
 class OrderPagination(PageNumberPagination):
@@ -99,8 +169,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     permission_classes = (IsAuthenticated,)
-
-    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
