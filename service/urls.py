@@ -13,13 +13,13 @@ from service.views import (
 )
 
 router = routers.DefaultRouter()
-router.register("crew", CrewViewSet)
-router.register("airport", AirportViewSet)
-router.register("route", RouteViewSet)
-router.register("airplane-type", AirplaneTypeViewSet)
-router.register("air-company", AirCompanyViewSet)
-router.register("airplane", AirplaneViewSet)
-router.register("flight", FlightViewSet)
+router.register("crews", CrewViewSet)
+router.register("airports", AirportViewSet)
+router.register("routes", RouteViewSet)
+router.register("airplane-types", AirplaneTypeViewSet)
+router.register("air-companies", AirCompanyViewSet)
+router.register("airplanes", AirplaneViewSet)
+router.register("flights", FlightViewSet)
 router.register("orders", OrderViewSet)
 
 urlpatterns = [path("", include(router.urls))]
