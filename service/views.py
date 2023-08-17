@@ -1,4 +1,6 @@
 from django.db.models import Prefetch, F, Count
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -122,6 +124,24 @@ class RouteViewSet(
             return RouteDetailSerializer
         return RouteSerializer
 
+    # Only for documentation purposes
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "source",
+                type={"type": "list", "items": {"type": "string"}},
+                description="Filter by source  (ex. ?source=ka)"
+            ),
+            OpenApiParameter(
+                "destination",
+                type={"type": "list", "items": {"type": "string"}},
+                description="Filter by destination  (ex. ?destination=pa)"
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class AirplaneTypeViewSet(
     mixins.ListModelMixin,
@@ -187,11 +207,11 @@ class FlightViewSet(viewsets.ModelViewSet):
 
         """Filtering by route, departure date, arrival date"""
 
-        route = self.request.query_params.get("route")
+        routes = self.request.query_params.get("routes")
         departure_date = self.request.query_params.get("departure")
         arrival_date = self.request.query_params.get("arrival")
-        if route:
-            route_ids = _params_to_ints(route)
+        if routes:
+            route_ids = _params_to_ints(routes)
             queryset = queryset.filter(route__id__in=route_ids)
         if departure_date:
             queryset = queryset.filter(departure_time__date=departure_date)
@@ -211,6 +231,31 @@ class FlightViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return FlightDetailSerializer
         return FlightSerializer
+
+    # Only for documentation purposes
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "routes",
+                type={"type": "list", "items": {"type": "number"}},
+                description="Filter by routes  (ex. ?route=1,2)"
+            ),
+            OpenApiParameter(
+                "departure date",
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                description="Filter by departure date (ex. ?departure=2023-10-08)",
+            ),
+            OpenApiParameter(
+                "arrival date",
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                description="Filter by arrival date (ex. ?arrival=2023-11-08)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrderViewSet(
