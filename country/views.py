@@ -1,11 +1,17 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAdminUser
 
 from country.models import Country, City
 from country.serializers import CountrySerializer, CitySerializer, CityListSerializer, CountryDetailSerializer
 
 
-class CountryViewSet(viewsets.ModelViewSet):
+class CountryViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
     permission_classes = (IsAdminUser,)
@@ -22,7 +28,13 @@ class CountryViewSet(viewsets.ModelViewSet):
         return CountrySerializer
 
 
-class CityViewSet(viewsets.ModelViewSet):
+class CityViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = City.objects.all().select_related("country").prefetch_related("airports")
     serializer_class = CitySerializer
 
