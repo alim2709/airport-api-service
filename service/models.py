@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 
 from django.utils import timezone
 
@@ -132,7 +133,7 @@ class Flight(models.Model):
 
     @staticmethod
     def validate_departure_arrival_time(departure_time, arrival_time, error_to_raise):
-        now = timezone.now()
+        now = datetime.now()
         if departure_time < now:
             raise error_to_raise(
                 {"departure_time": f"Departure time shouldn't be earlier than {now}"}

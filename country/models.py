@@ -12,7 +12,7 @@ class Country(models.Model):
 
 
 class City(models.Model):
-    name = models.CharField(max_length=63, unique=True)
+    name = models.CharField(max_length=63)
     country = models.ForeignKey(
         Country,
         on_delete=models.SET_NULL,
