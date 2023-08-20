@@ -47,7 +47,7 @@ def detail_url(airplane_id):
     return reverse("service:airplane-detail", args=[airplane_id])
 
 
-class UnauthenticatedFlightApiTests(TestCase):
+class UnauthenticatedAirplaneApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
 
@@ -56,7 +56,7 @@ class UnauthenticatedFlightApiTests(TestCase):
         self.assertEquals(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class AuthenticatedFlightApiTests(TestCase):
+class AuthenticatedAirplaneApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -85,7 +85,7 @@ class AuthenticatedFlightApiTests(TestCase):
         self.assertEquals(res.status_code, status.HTTP_200_OK)
         self.assertEquals(res.data, serializer.data)
 
-    def test_create_flight_forbidden(self):
+    def test_create_airplane_forbidden(self):
         airplane_type = sample_airplane_type(name="test_create_forbidden")
         air_company = sample_air_company(name="test_air_company_forbidden")
         payload = {
