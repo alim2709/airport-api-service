@@ -15,7 +15,7 @@ from service.models import (
     Airplane,
     Flight,
     Ticket,
-    Order
+    Order,
 )
 from service.serializers import (
     CrewSerializer,
@@ -35,7 +35,7 @@ from service.serializers import (
     AirplaneListSerializer,
     AirplaneDetailSerializer,
     FlightListSerializer,
-    FlightDetailSerializer
+    FlightDetailSerializer,
 )
 
 
@@ -81,7 +81,12 @@ class AirportViewSet(
             return AirportImageSerializer
         return AirportSerializer
 
-    @action(methods=["POST"], detail=True, url_path="upload-image", permission_classes=[IsAdminUser])
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="upload-image",
+        permission_classes=[IsAdminUser],
+    )
     def upload_image(self, request, pk=None):
         """Endpoint for uploading image to specific airport"""
         airport = self.get_object()
@@ -104,7 +109,9 @@ class RouteViewSet(
     def get_queryset(self):
         queryset = self.queryset
         if self.action == "list":
-            queryset = queryset.select_related("source__closest_big_city", "destination__closest_big_city")
+            queryset = queryset.select_related(
+                "source__closest_big_city", "destination__closest_big_city"
+            )
 
         """Filtering by source and destination"""
 
@@ -130,12 +137,12 @@ class RouteViewSet(
             OpenApiParameter(
                 "source",
                 type={"type": "list", "items": {"type": "string"}},
-                description="Filter by source  (ex. ?source=ka)"
+                description="Filter by source  (ex. ?source=ka)",
             ),
             OpenApiParameter(
                 "destination",
                 type={"type": "list", "items": {"type": "string"}},
-                description="Filter by destination  (ex. ?destination=pa)"
+                description="Filter by destination  (ex. ?destination=pa)",
             ),
         ]
     )
@@ -195,14 +202,17 @@ class FlightViewSet(viewsets.ModelViewSet):
     serializer_class = FlightSerializer
 
     def get_queryset(self):
-
         queryset = self.queryset
 
         if self.action == "list":
             queryset = (
                 queryset.select_related("airplane")
-                .annotate(tickets_available=F("airplane__rows") * F("airplane__seats_in_row") - Count("tickets"))
-                .order_by("id").prefetch_related("crew")
+                .annotate(
+                    tickets_available=F("airplane__rows") * F("airplane__seats_in_row")
+                    - Count("tickets")
+                )
+                .order_by("id")
+                .prefetch_related("crew")
             )
 
         """Filtering by route, departure date, arrival date"""
@@ -218,12 +228,16 @@ class FlightViewSet(viewsets.ModelViewSet):
         if arrival_date:
             queryset = queryset.filter(arrival_time__date=arrival_date)
 
-        return queryset.select_related(
-            "airplane__air_company",
-            "airplane__airplane_type",
-            "route__source__closest_big_city__country",
-            "route__destination__closest_big_city__country"
-        ).prefetch_related("crew", "tickets").distinct()
+        return (
+            queryset.select_related(
+                "airplane__air_company",
+                "airplane__airplane_type",
+                "route__source__closest_big_city__country",
+                "route__destination__closest_big_city__country",
+            )
+            .prefetch_related("crew", "tickets")
+            .distinct()
+        )
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -238,7 +252,7 @@ class FlightViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 "routes",
                 type={"type": "list", "items": {"type": "number"}},
-                description="Filter by routes  (ex. ?route=1,2)"
+                description="Filter by routes  (ex. ?route=1,2)",
             ),
             OpenApiParameter(
                 "departure date",
@@ -259,9 +273,7 @@ class FlightViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
 ):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -274,12 +286,8 @@ class OrderViewSet(
                 Prefetch(
                     "tickets",
                     queryset=Ticket.objects.select_related(
-                        "flight__route__destination",
-                        "flight__route__source"
-                    ).prefetch_related(
-                        "flight__airplane",
-                        "flight__crew"
-                    )
+                        "flight__route__destination", "flight__route__source"
+                    ).prefetch_related("flight__airplane", "flight__crew"),
                 )
             )
         return queryset

@@ -17,7 +17,10 @@ class Crew(models.Model):
     last_name = models.CharField(max_length=63)
 
     class Meta:
-        ordering = ("first_name", "last_name",)
+        ordering = (
+            "first_name",
+            "last_name",
+        )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -32,10 +35,7 @@ def airport_image_file_path(instance, filename):
 class Airport(models.Model):
     name = models.CharField(max_length=255, unique=True)
     closest_big_city = models.ForeignKey(
-        City,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="airports"
+        City, on_delete=models.SET_NULL, null=True, related_name="airports"
     )
     image = models.ImageField(null=True, upload_to=airport_image_file_path, blank=True)
 
@@ -48,16 +48,10 @@ class Airport(models.Model):
 
 class Route(models.Model):
     source = models.ForeignKey(
-        Airport,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="sources"
+        Airport, on_delete=models.SET_NULL, null=True, related_name="sources"
     )
     destination = models.ForeignKey(
-        Airport,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="destinations"
+        Airport, on_delete=models.SET_NULL, null=True, related_name="destinations"
     )
     distance = models.IntegerField()
 
@@ -94,16 +88,10 @@ class Airplane(models.Model):
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
     airplane_type = models.ForeignKey(
-        AirplaneType,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="airplanes"
+        AirplaneType, on_delete=models.SET_NULL, null=True, related_name="airplanes"
     )
     air_company = models.ForeignKey(
-        AirCompany,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="airplanes"
+        AirCompany, on_delete=models.SET_NULL, null=True, related_name="airplanes"
     )
 
     class Meta:
@@ -119,7 +107,9 @@ class Airplane(models.Model):
 
 class Flight(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name="flights")
-    airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE, related_name="flights")
+    airplane = models.ForeignKey(
+        Airplane, on_delete=models.CASCADE, related_name="flights"
+    )
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     crew = models.ManyToManyField(Crew, related_name="flights")
@@ -146,13 +136,11 @@ class Flight(models.Model):
 
     def clean(self):
         Flight.validate_departure_arrival_time(
-            self.departure_time,
-            self.arrival_time,
-            ValidationError
+            self.departure_time, self.arrival_time, ValidationError
         )
 
     def save(
-            self, force_insert=False, force_update=False, using=None, update_fields=None
+        self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         self.full_clean()
         return super(Flight, self).save(
@@ -179,43 +167,32 @@ class Ticket(models.Model):
             (row, "row", "rows"),
             (seat, "seat", "seats_in_row"),
         ]:
-            count_attrs = getattr(
-                flight.airplane, airplane_attr_name
-            )
+            count_attrs = getattr(flight.airplane, airplane_attr_name)
             if not (1 <= ticket_attr_value <= count_attrs):
                 raise error_to_raise(
                     {
                         ticket_attr_name: f"{ticket_attr_name} "
-                                          f"number must be in available range: "
-                                          f"(1, {airplane_attr_name}): "
-                                          f"(1, {count_attrs})"
+                        f"number must be in available range: "
+                        f"(1, {airplane_attr_name}): "
+                        f"(1, {count_attrs})"
                     }
                 )
 
     def clean(self):
-        Ticket.validate_seat_row(
-            self.row,
-            self.seat,
-            self.flight,
-            ValidationError
-        )
+        Ticket.validate_seat_row(self.row, self.seat, self.flight, ValidationError)
 
     def save(
-            self,
-            force_insert=False,
-            force_update=False,
-            using=None,
-            update_fields=None,
+        self,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
     ):
         self.full_clean()
-        super(Ticket, self).save(
-            force_insert, force_update, using, update_fields
-        )
+        super(Ticket, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return (
-            f"{str(self.flight)} (row: {self.row}, seat: {self.seat})"
-        )
+        return f"{str(self.flight)} (row: {self.row}, seat: {self.seat})"
 
 
 class Order(models.Model):

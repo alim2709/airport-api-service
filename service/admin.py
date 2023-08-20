@@ -9,7 +9,7 @@ from service.models import (
     AirplaneType,
     Route,
     Airport,
-    Crew
+    Crew,
 )
 
 

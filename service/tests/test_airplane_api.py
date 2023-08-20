@@ -11,18 +11,14 @@ AIRPLANE_URL = reverse("service:airplane-list")
 
 
 def sample_airplane_type(**params):
-    defaults = {
-        "name": "test_type"
-    }
+    defaults = {"name": "test_type"}
     defaults.update(params)
 
     return AirplaneType.objects.create(**defaults)
 
 
 def sample_air_company(**params):
-    defaults = {
-        "name": "test_company"
-    }
+    defaults = {"name": "test_company"}
     defaults.update(params)
 
     return AirCompany.objects.create(**defaults)
@@ -36,7 +32,7 @@ def sample_airplane(**params):
         "rows": 6,
         "seats_in_row": 5,
         "airplane_type": airplane_type,
-        "air_company": air_company
+        "air_company": air_company,
     }
     defaults.update(params)
 
@@ -60,8 +56,7 @@ class AuthenticatedAirplaneApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            "testunique@tests.com",
-            "unique_password"
+            "testunique@tests.com", "unique_password"
         )
         self.client.force_authenticate(self.user)
         self.airplane = sample_airplane()
@@ -93,7 +88,7 @@ class AuthenticatedAirplaneApiTests(TestCase):
             "rows": 6,
             "seats_in_row": 6,
             "airplane_type": airplane_type,
-            "air_company": air_company
+            "air_company": air_company,
         }
         res = self.client.post(AIRPLANE_URL, payload)
 
@@ -116,7 +111,7 @@ class AuthenticatedAirplaneApiTests(TestCase):
             "rows": 6,
             "seats_in_row": 6,
             "airplane_type": airplane_type,
-            "air_company": air_company
+            "air_company": air_company,
         }
         res = self.client.put(url, payload)
 
@@ -127,9 +122,7 @@ class AdminAirplaneApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            "admin@admin.com",
-            "testpass",
-            is_staff=True
+            "admin@admin.com", "testpass", is_staff=True
         )
         self.client.force_authenticate(self.user)
         self.airplane = sample_airplane()
@@ -142,7 +135,7 @@ class AdminAirplaneApiTests(TestCase):
             "rows": 6,
             "seats_in_row": 6,
             "airplane_type": airplane_type.id,
-            "air_company": air_company.id
+            "air_company": air_company.id,
         }
         res = self.client.post(AIRPLANE_URL, payload)
         self.assertEquals(res.status_code, status.HTTP_201_CREATED)
@@ -157,7 +150,7 @@ class AdminAirplaneApiTests(TestCase):
             "rows": 6,
             "seats_in_row": 6,
             "airplane_type": airplane_type.id,
-            "air_company": air_company.id
+            "air_company": air_company.id,
         }
         res = self.client.put(url, payload)
 

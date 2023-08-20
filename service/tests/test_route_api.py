@@ -29,8 +29,7 @@ class AuthenticatedRouteApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            "testunique@tests.com",
-            "unique_password"
+            "testunique@tests.com", "unique_password"
         )
         self.client.force_authenticate(self.user)
         self.route = sample_route()
@@ -45,7 +44,9 @@ class AuthenticatedRouteApiTests(TestCase):
         self.assertEquals(res.data["results"], serializer.data)
 
     def test_filter_route_by_source(self):
-        route1 = sample_route(source=sample_airport(name="test_source_filtered"), distance=300)
+        route1 = sample_route(
+            source=sample_airport(name="test_source_filtered"), distance=300
+        )
         route2 = sample_route(source=sample_airport(name="test_source2"), distance=400)
         route3 = sample_route(source=sample_airport(name="test_source3"), distance=500)
 
@@ -60,9 +61,15 @@ class AuthenticatedRouteApiTests(TestCase):
         self.assertNotIn(serializer3.data, res.data["results"])
 
     def test_filter_route_by_destination(self):
-        route1 = sample_route(destination=sample_airport(name="test_source_filtered"), distance=300)
-        route2 = sample_route(destination=sample_airport(name="test_source2"), distance=400)
-        route3 = sample_route(destination=sample_airport(name="test_source3"), distance=500)
+        route1 = sample_route(
+            destination=sample_airport(name="test_source_filtered"), distance=300
+        )
+        route2 = sample_route(
+            destination=sample_airport(name="test_source2"), distance=400
+        )
+        route3 = sample_route(
+            destination=sample_airport(name="test_source3"), distance=500
+        )
 
         res = self.client.get(ROUTE_URL, {"destination": "f"})
 
@@ -91,7 +98,7 @@ class AuthenticatedRouteApiTests(TestCase):
         payload = {
             "source": source_airport,
             "destination": destination_airport,
-            "distance": 500
+            "distance": 500,
         }
         res = self.client.post(ROUTE_URL, payload)
 
@@ -112,7 +119,7 @@ class AuthenticatedRouteApiTests(TestCase):
         payload = {
             "source": source_airport,
             "destination": destination_airport,
-            "distance": 500
+            "distance": 500,
         }
         res = self.client.put(url, payload)
 
@@ -123,9 +130,7 @@ class AdminRouteApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            "admin@admin.com",
-            "testpass",
-            is_staff=True
+            "admin@admin.com", "testpass", is_staff=True
         )
         self.client.force_authenticate(self.user)
         self.route = sample_route()
@@ -136,7 +141,7 @@ class AdminRouteApiTests(TestCase):
         payload = {
             "source": source_airport.id,
             "destination": destination_airport.id,
-            "distance": 500
+            "distance": 500,
         }
         res = self.client.post(ROUTE_URL, payload)
 
@@ -150,7 +155,7 @@ class AdminRouteApiTests(TestCase):
         payload = {
             "source": source_airport.id,
             "destination": destination_airport.id,
-            "distance": 500
+            "distance": 500,
         }
         res = self.client.put(url, payload)
 

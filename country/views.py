@@ -2,7 +2,12 @@ from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAdminUser
 
 from country.models import Country, City
-from country.serializers import CountrySerializer, CitySerializer, CityListSerializer, CountryDetailSerializer
+from country.serializers import (
+    CountrySerializer,
+    CitySerializer,
+    CityListSerializer,
+    CountryDetailSerializer,
+)
 
 
 class CountryViewSet(

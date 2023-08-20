@@ -14,10 +14,7 @@ class Country(models.Model):
 class City(models.Model):
     name = models.CharField(max_length=63)
     country = models.ForeignKey(
-        Country,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="cities"
+        Country, on_delete=models.SET_NULL, null=True, related_name="cities"
     )
 
     class Meta:

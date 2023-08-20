@@ -4,19 +4,24 @@ from country.models import City, Country
 
 
 class CitySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = City
         fields = ("id", "name", "country", "airports")
 
 
 class CityListSerializer(CitySerializer):
-    country = serializers.SlugRelatedField(many=False, read_only=True, slug_field="name")
-    airports = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    country = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field="name"
+    )
+    airports = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="name"
+    )
 
 
 class CityDetailSerializer(CitySerializer):
-    country = serializers.SlugRelatedField(many=False, read_only=True, slug_field="name")
+    country = serializers.SlugRelatedField(
+        many=False, read_only=True, slug_field="name"
+    )
 
     class Meta:
         model = City
@@ -24,7 +29,6 @@ class CityDetailSerializer(CitySerializer):
 
 
 class CountrySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Country
         fields = ("id", "name")

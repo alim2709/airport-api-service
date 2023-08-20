@@ -5,19 +5,20 @@ import service.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('service', '0001_initial'),
+        ("service", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='aircompany',
-            options={'ordering': ('name',), 'verbose_name_plural': 'AirCompanies'},
+            name="aircompany",
+            options={"ordering": ("name",), "verbose_name_plural": "AirCompanies"},
         ),
         migrations.AlterField(
-            model_name='airport',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to=service.models.airport_image_file_path),
+            model_name="airport",
+            name="image",
+            field=models.ImageField(
+                blank=True, null=True, upload_to=service.models.airport_image_file_path
+            ),
         ),
     ]

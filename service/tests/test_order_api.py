@@ -17,8 +17,7 @@ class OrderApiTests(TestCase):
 
         self.flight = sample_flight()
         self.user = get_user_model().objects.create_user(
-            "testunique@tests.com",
-            "unique_password"
+            "testunique@tests.com", "unique_password"
         )
         self.client.force_authenticate(self.user)
         self.order = Order.objects.create(user=self.user)
@@ -41,24 +40,18 @@ class OrderApiTests(TestCase):
         self.assertEqual(flight["airplane"], "Test Airplane")
         self.assertEqual(
             flight["departure_time"],
-            serializers.DateTimeField().to_representation(self.flight.departure_time)
+            serializers.DateTimeField().to_representation(self.flight.departure_time),
         )
         self.assertEqual(
             flight["arrival_time"],
-            serializers.DateTimeField().to_representation(self.flight.arrival_time)
+            serializers.DateTimeField().to_representation(self.flight.arrival_time),
         )
 
     def test_flights_detail_tickets(self):
-        response = self.client.get(
-            detail_url(self.flight.id)
-        )
+        response = self.client.get(detail_url(self.flight.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data["taken_seats"][0]["row"], self.ticket.row
-        )
-        self.assertEqual(
-            response.data["taken_seats"][0]["seat"], self.ticket.seat
-        )
+        self.assertEqual(response.data["taken_seats"][0]["row"], self.ticket.row)
+        self.assertEqual(response.data["taken_seats"][0]["seat"], self.ticket.seat)
 
     def test_flight_list_tickets_available(self):
         response = self.client.get(FLIGHT_URL)

@@ -8,16 +8,22 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from country.models import Country, City
-from service.models import Airport, Route, AirplaneType, AirCompany, Airplane, Crew, Flight
+from service.models import (
+    Airport,
+    Route,
+    AirplaneType,
+    AirCompany,
+    Airplane,
+    Crew,
+    Flight,
+)
 from service.serializers import FlightListSerializer, FlightDetailSerializer
 
 FLIGHT_URL = reverse("service:flight-list")
 
 
 def sample_country(**params):
-    defaults = {
-        "name": "testCountry"
-    }
+    defaults = {"name": "testCountry"}
     defaults.update(params)
     country, _ = Country.objects.get_or_create(**defaults)
     return country
@@ -26,10 +32,7 @@ def sample_country(**params):
 def sample_city(**params):
     country = sample_country()
 
-    defaults = {
-        "name": "Sample city",
-        "country": country
-    }
+    defaults = {"name": "Sample city", "country": country}
     defaults.update(params)
     city, _ = City.objects.get_or_create(**defaults)
     return city
@@ -37,10 +40,7 @@ def sample_city(**params):
 
 def sample_airport(**params):
     city = sample_city()
-    defaults = {
-        "name": "TestAirport",
-        "closest_big_city": city
-    }
+    defaults = {"name": "TestAirport", "closest_big_city": city}
     defaults.update(params)
     airport, _ = Airport.objects.get_or_create(**defaults)
     return airport
@@ -50,21 +50,17 @@ def sample_route(**params):
     source_city = sample_city(name="test_source")
     source = sample_airport(name="test_source", closest_big_city=source_city)
     destination_city = sample_city(name="test_destination")
-    destination = sample_airport(name="test_destination", closest_big_city=destination_city)
-    defaults = {
-        "source": source,
-        "destination": destination,
-        "distance": 300
-    }
+    destination = sample_airport(
+        name="test_destination", closest_big_city=destination_city
+    )
+    defaults = {"source": source, "destination": destination, "distance": 300}
     defaults.update(params)
     route, _ = Route.objects.get_or_create(**defaults)
     return route
 
 
 def sample_airplane_type(**params):
-    defaults = {
-        "name": "TestAirplaneType"
-    }
+    defaults = {"name": "TestAirplaneType"}
 
     defaults.update(params)
     airplane_type, _ = AirplaneType.objects.get_or_create(**defaults)
@@ -72,9 +68,7 @@ def sample_airplane_type(**params):
 
 
 def sample_air_company(**params):
-    defaults = {
-        "name": "TestAirCompany"
-    }
+    defaults = {"name": "TestAirCompany"}
 
     defaults.update(params)
     air_company, _ = AirCompany.objects.get_or_create(**defaults)
@@ -90,7 +84,7 @@ def sample_airplane(**params):
         "rows": 6,
         "seats_in_row": 10,
         "airplane_type": airplane_type,
-        "air_company": air_company
+        "air_company": air_company,
     }
 
     defaults.update(params)
@@ -99,10 +93,7 @@ def sample_airplane(**params):
 
 
 def sample_crew(**params):
-    defaults = {
-        "first_name": "test_first_name",
-        "last_name": "test_last_name"
-    }
+    defaults = {"first_name": "test_first_name", "last_name": "test_last_name"}
     defaults.update(params)
     crew, _ = Crew.objects.get_or_create(**defaults)
     return crew
@@ -142,8 +133,7 @@ class AuthenticatedFlightApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            "testunique@tests.com",
-            "unique_password"
+            "testunique@tests.com", "unique_password"
         )
         self.client.force_authenticate(self.user)
 
@@ -152,7 +142,7 @@ class AuthenticatedFlightApiTests(TestCase):
         city = sample_city(name="test23")
         route1 = sample_route(
             source=sample_airport(name="test_test1", closest_big_city=city),
-            destination=sample_airport(name="test_test2")
+            destination=sample_airport(name="test_test2"),
         )
         flight_with_crews = sample_flight(route=route1)
 
@@ -192,9 +182,15 @@ class AuthenticatedFlightApiTests(TestCase):
         with patch("service.models.datetime") as now_time_mock:
             now_time_mock.now.return_value = datetime.datetime(2023, 7, 10)
 
-            flight1 = sample_flight(route=sample_route(distance=300), departure_time="2023-07-11")
-            flight2 = sample_flight(route=sample_route(distance=400), departure_time="2023-07-12")
-            flight3 = sample_flight(route=sample_route(distance=500), departure_time="2023-07-13")
+            flight1 = sample_flight(
+                route=sample_route(distance=300), departure_time="2023-07-11"
+            )
+            flight2 = sample_flight(
+                route=sample_route(distance=400), departure_time="2023-07-12"
+            )
+            flight3 = sample_flight(
+                route=sample_route(distance=500), departure_time="2023-07-13"
+            )
 
             res = self.client.get(FLIGHT_URL, {"departure": "2023-07-11"})
 
@@ -211,9 +207,15 @@ class AuthenticatedFlightApiTests(TestCase):
     def test_filter_flight_by_arrival_date(self):
         with patch("service.models.datetime") as now_time_mock:
             now_time_mock.now.return_value = datetime.datetime(2023, 7, 10)
-            flight1 = sample_flight(route=sample_route(distance=300), arrival_time="2023-09-11")
-            flight2 = sample_flight(route=sample_route(distance=400), arrival_time="2023-09-12")
-            flight3 = sample_flight(route=sample_route(distance=500), arrival_time="2023-09-13")
+            flight1 = sample_flight(
+                route=sample_route(distance=300), arrival_time="2023-09-11"
+            )
+            flight2 = sample_flight(
+                route=sample_route(distance=400), arrival_time="2023-09-12"
+            )
+            flight3 = sample_flight(
+                route=sample_route(distance=500), arrival_time="2023-09-13"
+            )
 
             res = self.client.get(FLIGHT_URL, {"arrival": "2023-09-11"})
 
@@ -239,7 +241,6 @@ class AuthenticatedFlightApiTests(TestCase):
         self.assertEquals(res.data, serializer.data)
 
     def test_create_flight_forbidden(self):
-
         route = sample_route()
         airplane = sample_airplane()
         departure_time = datetime.datetime.now() + datetime.timedelta(days=2)
@@ -283,9 +284,7 @@ class AdminFlightApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            "admin@admin.com",
-            "testpass",
-            is_staff=True
+            "admin@admin.com", "testpass", is_staff=True
         )
         self.client.force_authenticate(self.user)
 
@@ -301,14 +300,14 @@ class AdminFlightApiTests(TestCase):
             "airplane": airplane.id,
             "departure_time": departure_time,
             "arrival_time": arrival_time,
-            "crew": [crew1.id, crew2.id]
+            "crew": [crew1.id, crew2.id],
         }
         check_in = {
             "route": route,
             "airplane": airplane,
             "departure_time": departure_time,
             "arrival_time": arrival_time,
-            "crew": [crew1, crew2]
+            "crew": [crew1, crew2],
         }
 
         res = self.client.post(FLIGHT_URL, payload)
@@ -333,7 +332,7 @@ class AdminFlightApiTests(TestCase):
             "airplane": airplane.id,
             "departure_time": departure_time,
             "arrival_time": arrival_time,
-            "crew": [crew1.id, crew2.id]
+            "crew": [crew1.id, crew2.id],
         }
         res = self.client.put(url, payload)
         self.assertEquals(res.status_code, status.HTTP_200_OK)
