@@ -8,7 +8,6 @@ from service.models import Route
 from service.serializers import RouteListSerializer, RouteDetailSerializer
 from service.tests.test_flight_api import sample_route, sample_airport
 
-
 ROUTE_URL = reverse("service:route-list")
 
 

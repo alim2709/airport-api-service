@@ -1,5 +1,5 @@
-import tempfile
 import os
+import tempfile
 
 from PIL import Image
 from django.contrib.auth import get_user_model
@@ -10,7 +10,6 @@ from rest_framework.test import APIClient
 
 from service.models import Airport
 from service.tests.test_flight_api import sample_city, sample_airport
-
 
 AIRPORT_URL = reverse("service:airport-list")
 

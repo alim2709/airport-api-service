@@ -209,7 +209,7 @@ class FlightViewSet(viewsets.ModelViewSet):
                 queryset.select_related("airplane")
                 .annotate(
                     tickets_available=F("airplane__rows") * F("airplane__seats_in_row")
-                    - Count("tickets")
+                                      - Count("tickets")
                 )
                 .order_by("id")
                 .prefetch_related("crew")

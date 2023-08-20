@@ -2,14 +2,12 @@ import os
 import uuid
 from datetime import datetime
 
-from django.utils import timezone
-
-from app import settings
-from country.models import City
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
-from django.core.exceptions import ValidationError
+from app import settings
+from country.models import City
 
 
 class Crew(models.Model):
