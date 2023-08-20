@@ -32,18 +32,32 @@ class AirportSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "closest_big_city",)
 
 
+class AirportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airport
+        fields = ("id", "image",)
+
+
 class AirportListSerializer(AirportSerializer):
     closest_big_city = serializers.SlugRelatedField(many=False, read_only=True, slug_field="name")
+
+    class Meta:
+        model = Airport
+        fields = (
+            "id",  "name", "closest_big_city", "image"
+        )
+        read_only_fields = ("id", "image")
 
 
 class AirportDetailSerializer(AirportSerializer):
     closest_big_city = CityDetailSerializer(many=False, read_only=True)
 
-
-class AirportImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
-        fields = ("id", "image",)
+        fields = (
+            "id",  "name", "closest_big_city", "image"
+        )
+        read_only_fields = ("id", "image")
 
 
 class RouteSerializer(serializers.ModelSerializer):
@@ -82,7 +96,6 @@ class AirCompanySerializer(serializers.ModelSerializer):
 
 
 class AirplaneSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Airplane
         fields = ("id", "name", "rows", "seats_in_row", "capacity", "airplane_type", "air_company")
