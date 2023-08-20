@@ -34,7 +34,7 @@ class AuthenticatedRouteApiTests(TestCase):
         )
         self.client.force_authenticate(self.user)
         self.route = sample_route()
-        self.airplane = sample_airport()
+        self.airport = sample_airport()
 
     def test_list_routes(self):
         res = self.client.get(ROUTE_URL)
@@ -43,6 +43,36 @@ class AuthenticatedRouteApiTests(TestCase):
         serializer = RouteListSerializer(routes, many=True)
         self.assertEquals(res.status_code, status.HTTP_200_OK)
         self.assertEquals(res.data["results"], serializer.data)
+
+    def test_filter_route_by_source(self):
+        route1 = sample_route(source=sample_airport(name="test_source_filtered"), distance=300)
+        route2 = sample_route(source=sample_airport(name="test_source2"), distance=400)
+        route3 = sample_route(source=sample_airport(name="test_source3"), distance=500)
+
+        res = self.client.get(ROUTE_URL, {"source": "f"})
+
+        serializer1 = RouteListSerializer(route1)
+        serializer2 = RouteListSerializer(route2)
+        serializer3 = RouteListSerializer(route3)
+
+        self.assertIn(serializer1.data, res.data["results"])
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertNotIn(serializer3.data, res.data["results"])
+
+    def test_filter_route_by_destination(self):
+        route1 = sample_route(destination=sample_airport(name="test_source_filtered"), distance=300)
+        route2 = sample_route(destination=sample_airport(name="test_source2"), distance=400)
+        route3 = sample_route(destination=sample_airport(name="test_source3"), distance=500)
+
+        res = self.client.get(ROUTE_URL, {"destination": "f"})
+
+        serializer1 = RouteListSerializer(route1)
+        serializer2 = RouteListSerializer(route2)
+        serializer3 = RouteListSerializer(route3)
+
+        self.assertIn(serializer1.data, res.data["results"])
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertNotIn(serializer3.data, res.data["results"])
 
     def test_retrieve_airplane_detail(self):
         route = self.route
