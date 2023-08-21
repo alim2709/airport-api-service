@@ -20,12 +20,14 @@ Change mocks to your native data inside .env.sample. Do not forget to change fil
     set POSTGRES_PORT=POSTGRES_PORT
     python manage.py migrate
     python manage.py runserver
+```
     
-    Use the following command to load prepared data from fixture:
-
+###    Use the following command to load prepared data from fixture:
+```
     python manage.py loaddata fixture-test-data.json
- 
-    After loading data from fixture you can use following superuser (or create another one by yourself):
+```
+###    After loading data from fixture you can use following superuser (or create another one by yourself):
+```
     - Login: `test@test1.com`
     - Password: `qwertyqwerty`
 ```
