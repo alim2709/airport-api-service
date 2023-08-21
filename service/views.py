@@ -136,12 +136,12 @@ class RouteViewSet(
         parameters=[
             OpenApiParameter(
                 "source",
-                type={"type": "list", "items": {"type": "string"}},
+                type={"type": "string"},
                 description="Filter by source  (ex. ?source=ka)",
             ),
             OpenApiParameter(
                 "destination",
-                type={"type": "list", "items": {"type": "string"}},
+                type={"type": "string"},
                 description="Filter by destination  (ex. ?destination=pa)",
             ),
         ]

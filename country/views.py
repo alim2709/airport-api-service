@@ -5,8 +5,8 @@ from country.models import Country, City
 from country.serializers import (
     CountrySerializer,
     CitySerializer,
-    CityListSerializer,
-    CountryDetailSerializer,
+    CityListRetrieveSerializer,
+    CountryListRetrieveSerializer,
 )
 
 
@@ -29,7 +29,7 @@ class CountryViewSet(
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
-            return CountryDetailSerializer
+            return CountryListRetrieveSerializer
         return CountrySerializer
 
 
@@ -45,5 +45,5 @@ class CityViewSet(
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
-            return CityListSerializer
+            return CityListRetrieveSerializer
         return CitySerializer

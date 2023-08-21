@@ -9,7 +9,7 @@ class CitySerializer(serializers.ModelSerializer):
         fields = ("id", "name", "country", "airports")
 
 
-class CityListSerializer(CitySerializer):
+class CityListRetrieveSerializer(CitySerializer):
     country = serializers.SlugRelatedField(
         many=False, read_only=True, slug_field="name"
     )
@@ -34,7 +34,7 @@ class CountrySerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-class CountryDetailSerializer(CountrySerializer):
+class CountryListRetrieveSerializer(CountrySerializer):
     cities = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
 
     class Meta:
